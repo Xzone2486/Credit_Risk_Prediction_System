@@ -1,0 +1,9 @@
+
+    --- Final SMOTE Model Evaluation ---
+    Threshold: 0.1727
+    ROC-AUC:   0.7458
+    Accuracy:  0.8359
+    Precision: 0.2225
+    Recall:    0.4143
+    F1 Score:  0.2896
+    
