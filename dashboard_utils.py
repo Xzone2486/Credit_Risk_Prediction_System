@@ -4,9 +4,12 @@ import xgboost as xgb
 import os
 import streamlit as st
 
+import json
+
 DATA_DIR = 'home-credit-default-risk'
 TRAIN_FILE = 'processed_train.csv'
-MODEL_FILE = 'xgboost_optimized.json' # Using the optimized (weighted) model for better default detection sensitivity
+MODEL_FILE = 'xgboost_optimized.json'
+ARTIFACTS_FILE = 'model_artifacts.json'
 
 @st.cache_resource
 def load_model():
@@ -18,20 +21,14 @@ def load_model():
 
 @st.cache_data
 def get_column_defaults():
-    # Load training data to get feature names and median/mode defaults
-    if not os.path.exists(TRAIN_FILE):
+    # Load pre-calculated artifacts (columns and defaults)
+    if not os.path.exists(ARTIFACTS_FILE):
         return None, None
     
-    # Read only first few rows to get columns if file is huge, but we need medians
-    # Reading full file is safer for accurate medians.
-    df = pd.read_csv(TRAIN_FILE)
-    columns = [c for c in df.columns if c not in ['TARGET', 'SK_ID_CURR']]
-    
-    # Calculate defaults
-    defaults = df[columns].median(numeric_only=True).to_dict()
-    # For anything missing (categorical OHE columns might be 0/1, median works)
-    
-    return columns, defaults
+    with open(ARTIFACTS_FILE, 'r') as f:
+        data = json.load(f)
+        
+    return data['columns'], data['defaults']
 
 def prepare_input_data(user_inputs, all_columns, defaults):
     # Create DataFrame with all columns initialized to defaults
